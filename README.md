@@ -25,6 +25,7 @@ Any issues discovered through the use of this project should be filed as GitHub 
 
 | library                                | description             | license    | source                                              |
 |----------------------------------------|-------------------------|------------|-----------------------------------------------------|
-| [transformers](https://huggingface.co/docs/transformers/en/index) | Hugging Face Transformers | Apache 2.0 | [GitHub](https://github.com/huggingface/transformers) |
-| [vllm](https://docs.vllm.ai/en/latest/) | Fast and efficient inference for LLMs | Apache 2.0 | [GitHub](https://github.com/vllm-project/vllm) |
+| [transformers](https://huggingface.co/docs/transformers/en/index) | Hugging Face Transformers | Apache 2.0 | [PyPI](https://pypi.org/project/transformers/) |
+| [vllm](https://docs.vllm.ai/en/latest/) | Fast and efficient inference for LLMs | Apache 2.0 | [PyPI](https://pypi.org/project/vllm/) |
 | [Amazon-Berkeley Objects (ABO) Dataset](https://amazon-berkeley-objects.s3.amazonaws.com/index.html) | A CC BY 4.0-licensed dataset of Amazon products with metadata, catalog images, and 3D models | Creative Commons Attribution 4.0 International Public License (CC BY 4.0) | [ABO](https://amazon-berkeley-objects.s3.amazonaws.com/index.html)
+

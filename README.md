@@ -1,7 +1,7 @@
 <img src=https://raw.githubusercontent.com/databricks-industry-solutions/.github/main/profile/solacc_logo.png width="600px"> 
 
-[![DBR](https://img.shields.io/badge/DBR-CHANGE_ME-red?logo=databricks&style=for-the-badge)](https://docs.databricks.com/release-notes/runtime/CHANGE_ME.html)
-[![CLOUD](https://img.shields.io/badge/CLOUD-CHANGE_ME-blue?logo=googlecloud&style=for-the-badge)](https://databricks.com/try-databricks)
+[![DBR](https://img.shields.io/badge/DBR-15.4_ML_LTS-red?logo=databricks&style=for-the-badge)](https://docs.databricks.com/release-notes/runtime/15.4lts-ml.html)
+[![CLOUD](https://img.shields.io/badge/CLOUD-AZURE/AWS/GCP-blue?logo=googlecloud&style=for-the-badge)](https://databricks.com/try-databricks)
 
 ## Business Problem
 
@@ -27,4 +27,4 @@ Any issues discovered through the use of this project should be filed as GitHub 
 |----------------------------------------|-------------------------|------------|-----------------------------------------------------|
 | [transformers](https://huggingface.co/docs/transformers/en/index) | Hugging Face Transformers | Apache 2.0 | [GitHub](https://github.com/huggingface/transformers) |
 | [vllm](https://docs.vllm.ai/en/latest/) | Fast and efficient inference for LLMs | Apache 2.0 | [GitHub](https://github.com/vllm-project/vllm) |
-| [Amazon-Berkeley Objects (ABO) Dataset](https://amazon-berkeley-objects.s3.amazonaws.com/index.html) | A CC BY 4.0-licensed dataset of Amazon products with metadata, catalog images, and 3D models | Creative Commons Attribution 4.0 International Public License (CC BY 4.0) | https://amazon-berkeley-objects.s3.amazonaws.com/index.html
+| [Amazon-Berkeley Objects (ABO) Dataset](https://amazon-berkeley-objects.s3.amazonaws.com/index.html) | A CC BY 4.0-licensed dataset of Amazon products with metadata, catalog images, and 3D models | Creative Commons Attribution 4.0 International Public License (CC BY 4.0) | [ABO](https://amazon-berkeley-objects.s3.amazonaws.com/index.html)

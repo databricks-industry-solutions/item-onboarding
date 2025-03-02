@@ -55,11 +55,11 @@ onboarding_df_path = "/Volumes/mas/item_onboarding/interim_data/onboarding"
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ### Build Interim Data 
+# MAGIC ### Build Interim Data
 # MAGIC
 # MAGIC We need to take in all of the data points, the ones we got from the suppliers as well as the ones we got from the visual model and then need to join them so we can use it all during the text based workflow.
 # MAGIC
-# MAGIC It is easier for Ray to pick up Parquet files from Databricks' Volumes, therefore, at the very end of the cell, we will save the finalised interim dataframe as a Parquet on the Volume. 
+# MAGIC It is easier for Ray to pick up Parquet files from Databricks' Volumes, therefore, at the very end of the cell, we will save the finalised interim dataframe as a Parquet on the Volume.
 
 # COMMAND ----------
 
@@ -78,7 +78,7 @@ image_analysis_df = (
         "path AS real_path", 
         "description AS gen_description", 
         "color AS gen_color",
-    ])
+    ]
 )
 
 # Cleaning the generated description and color text
@@ -168,6 +168,7 @@ ray.init(ignore_reinit_error=True)
 # Specify model path
 model_path = "/Volumes/mas/item_onboarding/models/llama-31-8b-instruct/"
 
+
 # Load the LLM to the GPU
 @ray.remote(num_gpus=1)
 class LLMActor:
@@ -176,11 +177,9 @@ class LLMActor:
         self.model = LLM(model=model_path, max_model_len=2048)
 
     def generate(self, prompt, sampling_params):
-        raw_output = self.model.generate(
-            prompt, 
-            sampling_params=sampling_params
-        )
+        raw_output = self.model.generate(prompt, sampling_params=sampling_params)
         return raw_output
+
 
 # Create the LLM actor - this part loads the model to the GPU. It will do it async.
 llm_actor = LLMActor.remote(model_path)
@@ -196,6 +195,7 @@ llm_actor = LLMActor.remote(model_path)
 
 # COMMAND ----------
 
+
 # Llama prompt format
 def produce_prompt(system, instruction):
     prompt = (
@@ -205,7 +205,10 @@ def produce_prompt(system, instruction):
     )
     return prompt
 
-test_prompt = produce_prompt("You are a helpful assistant", "How many days are there in a week")
+
+test_prompt = produce_prompt(
+    "You are a helpful assistant", "How many days are there in a week"
+)
 print(test_prompt)
 
 # COMMAND ----------
@@ -216,7 +219,9 @@ print(test_prompt)
 # COMMAND ----------
 
 # Calling the actor with the generation request built above
-result = ray.get(llm_actor.generate.remote(test_prompt, SamplingParams(temperature=0.1)))
+result = ray.get(
+    llm_actor.generate.remote(test_prompt, SamplingParams(temperature=0.1))
+)
 
 # Formatting result printing
 print(result)
@@ -262,15 +267,15 @@ print(single_record)
 # COMMAND ----------
 
 sampling_params = SamplingParams(
-    n=1, # Number of output sequences to return for the given prompt
-    temperature=0.1, # Randomness of the sampling. Lower values make the model more deterministic, while higher values make the model more random. Zero means greedy sampling.
-    top_p=0.9, # Cumulative probability of the top tokens to consider
-    top_k=50, # Number of top tokens to consider
+    n=1,  # Number of output sequences to return for the given prompt
+    temperature=0.1,  # Randomness of the sampling. Lower values make the model more deterministic, while higher values make the model more random. Zero means greedy sampling.
+    top_p=0.9,  # Cumulative probability of the top tokens to consider
+    top_k=50,  # Number of top tokens to consider
     max_tokens=256,  # Adjust this value based on your specific task
-    stop_token_ids=[128009], # Stop the generation when they are generated
-    presence_penalty=0.1, # Penalizes new tokens based on whether they appear in the generated text so far
-    frequency_penalty=0.1, # Penalizes new tokens based on their frequency in the generated text so far
-    ignore_eos=False, # Whether to ignore the EOS token and continue generating tokens after the EOS token is generated.
+    stop_token_ids=[128009],  # Stop the generation when they are generated
+    presence_penalty=0.1,  # Penalizes new tokens based on whether they appear in the generated text so far
+    frequency_penalty=0.1,  # Penalizes new tokens based on their frequency in the generated text so far
+    ignore_eos=False,  # Whether to ignore the EOS token and continue generating tokens after the EOS token is generated.
 )
 
 # COMMAND ----------
@@ -303,9 +308,8 @@ description_instruction = description_instruction.format(
 
 # Format the prompt
 description_prompt = produce_prompt(
-    system = description_system_prompt,
-    instruction=description_instruction
-    )
+    system=description_system_prompt, instruction=description_instruction
+)
 
 print(description_prompt)
 
@@ -318,7 +322,7 @@ print(suggested_description)
 # MAGIC %md
 # MAGIC ### Color Prompt
 # MAGIC
-# MAGIC Our description is ready, lets go ahead and ask the model to generate an ultimate color for our product. Some of the data coming from the supplier is missing the color field, so the input from the visual model is going to be key here. 
+# MAGIC Our description is ready, lets go ahead and ask the model to generate an ultimate color for our product. Some of the data coming from the supplier is missing the color field, so the input from the visual model is going to be key here.
 
 # COMMAND ----------
 
@@ -342,10 +346,7 @@ color_instruction = color_instruction.format(
 )
 
 # Format the prompt
-color_prompt = produce_prompt(
-    system = color_system_prompt,
-    instruction=color_instruction
-)
+color_prompt = produce_prompt(system=color_system_prompt, instruction=color_instruction)
 
 print(color_prompt)
 
@@ -363,7 +364,7 @@ print(suggested_color)
 # MAGIC %md
 # MAGIC ### Keyword Prompt
 # MAGIC
-# MAGIC Our suppliers also give us bunch of keywords to optimise for search, however there are problematic data points coming from here too where keywords get repeated multiple times, or don't actually match the item correctly. 
+# MAGIC Our suppliers also give us bunch of keywords to optimise for search, however there are problematic data points coming from here too where keywords get repeated multiple times, or don't actually match the item correctly.
 # MAGIC
 # MAGIC This part will aim to optimize the keywords while keeping the same format.
 
@@ -385,8 +386,7 @@ Return new keywords separated by |. No other text. Do not explain.
 
 # Format the prompt
 keyword_prompt = produce_prompt(
-    system = keyword_system_prompt,
-    instruction=keyword_instruction
+    system=keyword_system_prompt, instruction=keyword_instruction
 )
 
 # Populate the prompt
@@ -437,8 +437,7 @@ Return the single best matching category and no other text.
 
 # Format the prompt
 taxonomy_prompt = produce_prompt(
-    system = taxonomy_system_prompt,
-    instruction=taxonomy_instruction
+    system=taxonomy_system_prompt, instruction=taxonomy_instruction
 )
 
 # Populate the prompt
@@ -459,7 +458,7 @@ print(suggested_category)
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC The model succesfully places the item in the right category. 
+# MAGIC The model succesfully places the item in the right category.
 
 # COMMAND ----------
 
@@ -507,7 +506,7 @@ onboarding_ds.schema
 # MAGIC
 # MAGIC The way we will design our inference is going to be quite similar to the way we have done so with the image model, with the exception ,again, being the fact that we will use vLLM here..
 # MAGIC
-# MAGIC We will use the class with `__init__` and `__call__` methods, where the `__call__` method will hold the flow of our inference. The flow is important as the answers generated in the first steps will be used in the later stages, so it needs to be sequential. 
+# MAGIC We will use the class with `__init__` and `__call__` methods, where the `__call__` method will hold the flow of our inference. The flow is important as the answers generated in the first steps will be used in the later stages, so it needs to be sequential.
 # MAGIC
 # MAGIC We will also build some helper functions to standardise things like prompt formatting.
 
@@ -561,7 +560,7 @@ class OnboardingLLM:
             top_p=0.9,
             top_k=50,
             max_tokens=max_tokens,  # Adjust this value based on your specific task
-            stop_token_ids=[128009], # Specific to LLAMA 3.1 <|eot_id|>
+            stop_token_ids=[128009],  # Specific to LLAMA 3.1 <|eot_id|>
             presence_penalty=0.1,
             frequency_penalty=0.1,
             ignore_eos=False,
@@ -583,7 +582,9 @@ class OnboardingLLM:
         """
 
         # Build prompts
-        prompt_template = produce_prompt(system=system_prompt, instruction=instruction)
+        prompt_template = self.format_prompt(
+            system=system_prompt, instruction=instruction
+        )
         prompts = np.vectorize(prompt_template.format)(
             bullet_point=batch["bullet_point"], gen_description=batch["gen_description"]
         )
@@ -613,7 +614,9 @@ class OnboardingLLM:
         """
 
         # Format the prompt
-        prompt_template = produce_prompt(system=system_prompt, instruction=instruction)
+        prompt_template = self.format_prompt(
+            system=system_prompt, instruction=instruction
+        )
         prompts = np.vectorize(prompt_template.format)(
             color=batch["color"], gen_color=batch["gen_color"]
         )
@@ -644,7 +647,9 @@ class OnboardingLLM:
         """
 
         # Format the prompt
-        prompt_template = produce_prompt(system=system_prompt, instruction=instruction)
+        prompt_template = self.format_prompt(
+            system=system_prompt, instruction=instruction
+        )
         prompts = np.vectorize(prompt_template.format)(
             item_keywords=batch["item_keywords"],
             suggested_description=batch["suggested_description"],
@@ -653,7 +658,7 @@ class OnboardingLLM:
 
         # Build sampling params
         sampling_params = self.build_sampling_params(max_tokens=256)
-        
+
         # Inference
         raw_output = self.model.generate(prompts, sampling_params=sampling_params)
 
@@ -661,9 +666,8 @@ class OnboardingLLM:
         batch["suggested_keywords"] = self.standardise_output(raw_output)
 
         return batch
-    
-    def generate_suggested_product_category(self, batch):
 
+    def generate_suggested_product_category(self, batch):
         # Suggested category - system prompt
         system_prompt = "You are an expert merchandise taxonomy specialists"
 
@@ -680,15 +684,17 @@ class OnboardingLLM:
         """
 
         # Format the prompt
-        prompt_template = produce_prompt(system=system_prompt, instruction=instruction)
+        prompt_template = self.format_prompt(
+            system=system_prompt, instruction=instruction
+        )
         prompts = np.vectorize(prompt_template.format)(
             suggested_description=batch["suggested_description"],
-            target_taxonomy=self.target_taxonomy
+            target_taxonomy=self.target_taxonomy,
         )
 
         # Build sampling params
         sampling_params = self.build_sampling_params(max_tokens=256)
-        
+
         # Inference
         raw_output = self.model.generate(prompts, sampling_params=sampling_params)
 
@@ -696,6 +702,7 @@ class OnboardingLLM:
         batch["suggested_category"] = self.standardise_output(raw_output)
 
         return batch
+
 
 # COMMAND ----------
 
@@ -710,9 +717,6 @@ class OnboardingLLM:
 
 # Specify model path
 model_path = "/Volumes/mas/item_onboarding/models/llama-31-8b-instruct/"
-
-# Speicify for saving the model weights
-model_weights_folder = "mas.review_summarisation.model_weights"
 
 # Pick up the data
 onboarding_ds = ray.data.read_parquet(onboarding_df_path)
@@ -746,5 +750,3 @@ ft_onboarding_ds.write_parquet(save_path)
 ray.shutdown()
 
 # COMMAND ----------
-
-
